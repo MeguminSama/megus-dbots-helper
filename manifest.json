@@ -1,0 +1,8 @@
+{
+  "name": "Megumin's DBots Helper",
+  "version": "0.0.1",
+  "description": "Bad bots begone!",
+  "author": "Megumin",
+  "permission": "ext_api",
+  "license": "MIT"
+}
