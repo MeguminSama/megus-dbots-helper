@@ -21,9 +21,9 @@ module.exports = {
   },
   commandParser: (string, { author, channel, reason }) => {
     let tmp = string
-      .replaceAll('%%BOT_MENTION%%', `<@!${author.id}>`)
-      .replaceAll('%%BOT_ID%%', `${author.id}`)
-      .replaceAll('%%ACTION_REASON%%', `${reason}`)
+      .replace(/%%BOT_MENTION%%/g, `<@!${author.id}>`)
+      .replace(/%%BOT_ID%%/g, `${author.id}`)
+      .replace(/%%ACTION_REASON%%/g, `${reason}`)
     return tmp
   }
 }

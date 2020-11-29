@@ -86,14 +86,8 @@ module.exports = class DBotsConfirmationModal extends React.PureComponent {
               cmd = config.commandParser(cmd, { author, channel, reason: this.state.reason })
               sendMessage(channel.id, {
                 content: cmd
-              })
-                .then(() => {
-                  closeModal()
-                })
-                .catch(err => {
-                  console.error(err)
-                  closeModal()
-                })
+              }).catch(console.error)
+              closeModal()
             } else {
               this.setState({ error: "You need to specify a reason!" })
             }
