@@ -21,11 +21,12 @@ module.exports = class DBotsConfirmationModal extends React.PureComponent {
       error: "",
       reason: ""
     }
+    this.actionType = action
     this.action = toTitleCase(`${action} ${author.username}#${author.discriminator}`)
     this.buttonStyle = {
       marginRight: "10px"
     }
-    this.defaults = config.settings.reasons
+    this.defaults = config.settings.reasons[action] || []
     this.defaultButtons = this.defaults.map(d => (
       <Button
         color={Button.Colors.TRANSPARENT}
@@ -65,7 +66,7 @@ module.exports = class DBotsConfirmationModal extends React.PureComponent {
             value={this.state.reason}
             onChange={(value) => { this.setState({ reason: value }) }}
           >
-            Input
+            {this.actionType} reason
           </TextInput>
 
           {this.defaultButtons}

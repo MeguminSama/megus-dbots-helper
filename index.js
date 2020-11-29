@@ -71,12 +71,87 @@ module.exports = class DBotsHelper extends Plugin {
 
     this.patchContextMenu()
     this.patchBotProfile()
+    this.patchUserContextMenu()
   }
 
   async getBotInfo (id) {
     return await get(`https://discord.bots.gg/api/v1/bots/${id}`).then(
       r => r.body
     )
+  }
+
+  async patchUserContextMenu () {
+    const UserContextMenu = await getModule(
+      m => m.default && m.default.displayName === 'GuildChannelUserContextMenu'
+    )
+    const Default = UserContextMenu.default
+    const UserProfileModalActionCreators = getModule(
+      ['fetchProfile', 'open'],
+      false
+    )
+    const { MenuItem } = await getModule(['MenuItem'])
+    const { MenuSeparator } = await getModule(['MenuSeparator'])
+    const { MenuItemColor } = await getModule(['MenuItemColor'])
+    const { getMember } = this.utilityMethods
+    const _this = this
+    if (!UserContextMenu) return
+    const menuLogo = 'https://discord.bots.gg/img/logo_transparent.png'
+    const methods = config.settings.actions
+    inject(
+      'dbots-user-context-menu',
+      UserContextMenu,
+      'default',
+      ([info], res) => {
+        if (!res || !res.props || !res.props.children) return res
+        if (!info.user || !info.user.bot) return res
+
+        let children = res.props.children.props.children
+
+        let methodbuttons = methods
+          .filter(m => _this.settings.get(m.commandKey, '') !== '%%NOCMD')
+          .map(m =>
+            React.createElement(MenuItem, {
+              id: `DiscordBotsContext${m.action}`,
+              label: m.action.charAt(0).toUpperCase() + m.action.slice(1),
+              color: m.color || MenuItemColor.DEFAULT,
+              action: () => {
+                openModal(() =>
+                  React.createElement(_this.LinkedDBotsConfirmationModal, {
+                    action: m.action,
+                    author: info.user,
+                    channel: info.channelId,
+                    utilityMethods: _this.utilityMethods,
+                    commandKey: m.commandKey
+                  })
+                )
+              }
+            })
+          )
+        children.unshift(
+          React.createElement(
+            MenuItem,
+            {
+              id: 'DiscordBotsUserSubMenu',
+              label: 'Discord Bots',
+              imageUrl: menuLogo,
+              color: MenuItemColor.BRAND
+            },
+            [
+              React.createElement(MenuItem, {
+                id: 'DiscordBotsUserSubMenuHeader',
+                label: info.user.username,
+                action: () => UserProfileModalActionCreators.open(info.user.id)
+              }),
+              React.createElement(MenuSeparator),
+              ...methodbuttons
+            ]
+          )
+        )
+        return res
+      }
+    )
+
+    Object.assign(UserContextMenu.default, Default)
   }
 
   async patchContextMenu () {
@@ -111,30 +186,7 @@ module.exports = class DBotsHelper extends Plugin {
         )
           return res
 
-        const methods = [
-          {
-            action: 'mute',
-            commandKey: 'dbots-mute-cmd'
-          },
-          {
-            action: 'supermute',
-            commandKey: 'dbots-supermute-cmd'
-          },
-          {
-            action: 'bully',
-            commandKey: 'dbots-bully-cmd'
-          },
-          {
-            action: 'shitpostmute',
-            commandKey: 'dbots-shitpostmute-cmd',
-            color: MenuItemColor.DANGER
-          },
-          {
-            action: 'delete',
-            commandKey: 'dbots-delete-cmd',
-            color: MenuItemColor.DANGER
-          }
-        ]
+        const methods = config.settings.actions
 
         const menuLogo = 'https://discord.bots.gg/img/logo_transparent.png'
         children.splice(
@@ -143,7 +195,6 @@ module.exports = class DBotsHelper extends Plugin {
           React.createElement(
             MenuItem,
             {
-              name: 'Discord Bots',
               id: 'DiscordBotsSubMenu',
               label: 'Discord Bots',
               imageUrl: menuLogo,
@@ -153,7 +204,6 @@ module.exports = class DBotsHelper extends Plugin {
               .filter(m => _this.settings.get(m.commandKey, '') !== '%%NOCMD')
               .map(m =>
                 React.createElement(MenuItem, {
-                  name: m.action,
                   id: `DiscordBotsContext${m.action}`,
                   label: m.action.charAt(0).toUpperCase() + m.action.slice(1),
                   color: m.color || MenuItemColor.DEFAULT,
@@ -279,6 +329,7 @@ module.exports = class DBotsHelper extends Plugin {
     uninject('dbots-profile-tab-body')
     uninject('dbots-profile-async-tab-body')
     uninject('dbots-message-context-menu')
+    uninject('dbots-user-context-menu')
 
     powercord.api.settings.unregisterSettings('megus-dbots-helper')
   }
