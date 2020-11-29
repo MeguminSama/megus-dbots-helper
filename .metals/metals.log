@@ -2,3 +2,5 @@
 2020.11.29 15:05:33 INFO  time: initialize in 1.24s
 2020.11.29 15:05:33 WARN  Build server is not auto-connectable.
 2020.11.29 15:05:33 WARN  no build tool detected in workspace 'C:\Users\megu\Documents\Workspace\megus-dbots-helper'. The most common cause for this problem is that the editor was opened in the wrong working directory, for example if you use sbt then the workspace directory should contain build.sbt. 
+Nov 29, 2020 3:12:32 PM org.eclipse.lsp4j.jsonrpc.services.GenericEndpoint notify
+INFO: Unsupported notification method: $/setTraceNotification
