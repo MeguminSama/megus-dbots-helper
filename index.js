@@ -66,7 +66,7 @@ module.exports = class DBotsHelper extends Plugin {
     this.utilityMethods = {
       sendMessage: (await getModule(['sendMessage', 'editMessage']))
         .sendMessage,
-      getMember: (await pdk.getModule(['getMember'])).getMember
+      getMember: (await getModule(['getMember'])).getMember
     }
 
     this.patchContextMenu()
